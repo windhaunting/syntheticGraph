@@ -6,16 +6,12 @@ Created on Tue Oct 24 11:41:47 2017
 @author: fubao
 """
 
+import os
 import networkx as nx
-import collections
 
 from collections import defaultdict
-
-
-import matplotlib.pyplot as plt
-from networkx.readwrite import json_graph;
-import json
-import webbrowser
+from random import randint
+from random import choice
 import sys
 sys.path.append("../")
 
@@ -50,9 +46,22 @@ class syntheticGraph(object):
     def __init__(self):
         self.totalNodeNumber  = 1000    #10000000      #10million
        # self.totalEdgeNumber  = 50000000      #50million;  node number decided by edge number
-        self.nodeIdToTypeMap = defaultdict()
-        self.nodeIdToNameMpa = defaultdict()
+        self.nodeIdToTypeMap = defaultdict()         #node Id to node type Id
+        self.nodeIdToNameMap = defaultdict()         #node Id to node name
 
+
+    def judgeEdgeHierLevel(self, nodeIdSrc, nodeIdDst):
+        '''
+        judge whether two nodes are possibly to hierarchical node
+        '''
+        
+        if (self.nodeIdToTypeMap[nodeIdSrc] == GRAPHNODETYPE.TYPE0HIER.value and self.nodeIdToTypeMap[nodeIdDst] ==  GRAPHNODETYPE.TYPE0HIER.value) or \
+           (self.nodeIdToTypeMap[nodeIdSrc] == GRAPHNODETYPE.TYPE1HIER.value and self.nodeIdToTypeMap[nodeIdDst] ==  GRAPHNODETYPE.TYPE1HIER.value):
+            return True
+        else:
+            return False
+        
+    
     def generateHierNode(self, startNodeId, nodeTypeLst, nodesNumberLst, listNodeInfo):
         '''
         generate node Info
@@ -70,12 +79,41 @@ class syntheticGraph(object):
                 #write into list
                 listNodeInfo.append([nodeName, nodeId])
                 self.nodeIdToTypeMap[nodeId] = nodeName
+                self.nodeIdToNameMap[nodeId] = nodeTypeLst[i].value
+                
                 
             startNodeId = startNodeId + nodeNumber
         return startNodeId, listNodeInfo
 
 
-    def generateAllNodeInfo(self, outFile):
+    def generateEdgeList(self, maximumDegree):
+        '''
+        generate edge for nodes in the graph
+        '''
+        #edge hierarchical level same, higher, lower
+        
+        edgeList = []
+        hierarchiLevelList = ['same', 'higher', 'lower']
+        listNodes = self.nodeIdToTypeMap.keys()
+        for nodeId in listNodes:
+            #generate edge
+            number = randint(0, maximumDegree)
+            for i in range(0, number):
+                #randomly select a node
+                selectNodeId = choice(listNodes)
+                if selectNodeId != nodeId:
+                    #construct edge
+                    if nodeId != selectNodeId:
+                        if self.judgeEdgeHierLevel(nodeId, selectNodeId):     #hierarchical node
+                            #select hierarchical node level 
+                            hierLevel = choice(hierarchiLevelList)
+                            edgeList.append([nodeId, selectNodeId, hierLevel])
+                        else:
+                            hierLevel = hierarchiLevelList[0]
+                            edgeList.append([nodeId, selectNodeId, hierLevel])
+        return edgeList
+        
+    def generateAllNodeInfo(self, outFileNodeInfo, outFileEdgeList):
         '''
         generate all node info file
         '''
@@ -100,24 +138,24 @@ class syntheticGraph(object):
         nodesNumberLst = [int(self.totalNodeNumber * 0.1), int(self.totalNodeNumber * 0.1), int(self.totalNodeNumber * 0.2)]                        #20%
         startNodeId, listNodeInfo = self.generateHierNode(startNodeId, nodeTypeLst, nodesNumberLst, listNodeInfo)
         print ("generateAllNodeInfo listNodeInfo  3: ", len(listNodeInfo))
-                
-        
+          
+        #get edge list file
+        edgeList = generateEdgeList(outFileNodeInfo, outFileEdgeList)
         
         #write into file
+        os.remove(outFile) if os.path.exists(outFile) else None
+
         writeListToFileWriterTsv(outFile, listNodeInfo, "\t")
         
                 
-    def generateEdgeList():
-        '''
-        generate edge for nodes in the graph
-        '''
+
         
           
 if __name__ == "__main__":
     syntheticGraphObj = syntheticGraph()
-    outFile = "../../GraphQuerySearchRelatedPractice/Data/syntheticGraph/syntheticGraphNodeInfo.tsv"
-    
-    syntheticGraphObj.generateAllNodeInfo(outFile)
+    outFileNodeInfo = "../../GraphQuerySearchRelatedPractice/Data/syntheticGraph/syntheticGraphNodeInfo.tsv"
+    outFileEdgeList = "../../GraphQuerySearchRelatedPractice/Data/syntheticGraph/syntheticGraphEdgeListInfo.tsv"
+    syntheticGraphObj.generateAllNodeInfo(outFileNodeInfo, outFileEdgeList)
     
 
         
