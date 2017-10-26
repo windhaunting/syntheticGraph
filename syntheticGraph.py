@@ -135,6 +135,49 @@ class syntheticGraph(object):
         
     
     
+    def generateEdgeListVersion2(self, maximumDegree):
+        '''
+        version 2: select part of  hierarchical level nodes constructed as hierarchical nodes; 
+        other nodes are constructed randomly
+        generate edge for nodes in the graph
+        '''
+        #edge hierarchical level same, higher, lower
+        
+        edgeList = []
+        hierarchiLevelList = ['same', 'higher', 'lower']
+        listNodes = list(self.nodeIdToTypeMap.keys())
+        pairEdgeMap = defaultdict()               #used for checking whether pair edge is created before
+        
+        ratioPart = [0.01]*10    #ratio of hierarchical node
+        nodeLst0HierarchiLevel = []         #nodes with GRAPHNODETYPE.TYPE0HIER type
+        nodeLst1HierarLevel = []            # nodes with GRAPHNODETYPE.TYPE1HIER type
+        otherNodeLst = []              #except from nodeLst0HierarchiLevel and nodeLst1HierarLevel
+        for node, nodetype in nodeIdToTypeMap.items():
+            if nodeType == GRAPHNODETYPE.TYPE0HIER.value:
+                nodeLst0HierarchiLevel.append(node)
+            if nodeType == GRAPHNODETYPE.TYPE1HIER.value:
+                nodeLst1HierarLevel.append(node)
+                
+        #get first part hiearchical node
+        for i in ratioPart:
+            nodeLst = nodeLst0HierarchiLevel[0: int(ratioPart[0]*len(nodeLst0HierarchiLevel))]
+            
+            tmp = nodeLst
+            
+            for i, ndId in enumerate(nodeLst):
+                #random select node from nodeLst
+                if i < len(nodeLst)-1:
+                    selectNd = nodeLst[i]         #choice(nodeLst)
+                    edgeList.append([selectNodeId, ndId, "lower"])
+                    edgeList.append([ndId, selectNodeId, "higher"])
+                
+                #remove from nodeLst
+                number = randint(0, maximumDegree-1)
+                    for i in range(0, number):
+                                
+        return edgeList
+        
+    
     def generateAllNodeInfo(self, outFileNodeInfo, outFileEdgeList):
         '''
         generate all node info file
