@@ -178,9 +178,9 @@ class syntheticGraph(object):
         return edgeList
         
     
-    def generateAllNodeInfo(self, outFileNodeInfo, outFileEdgeList):
+    def generateAllNodeInfoEdge(self, outFileNodeInfo, outFileEdgeList):
         '''
-        generate all node info file
+        generate all node info file and edge list file
         '''
         
         listNodeInfo = []
@@ -223,7 +223,7 @@ if __name__ == "__main__":
     syntheticGraphObj = syntheticGraph()
     outFileNodeInfo = "../../GraphQuerySearchRelatedPractice/Data/syntheticGraph/syntheticGraphNodeInfo.tsv"
     outFileEdgeList = "../../GraphQuerySearchRelatedPractice/Data/syntheticGraph/syntheticGraphEdgeListInfo.tsv"
-    syntheticGraphObj.generateAllNodeInfo(outFileNodeInfo, outFileEdgeList)
+    syntheticGraphObj.generateAllNodeInfoEdge(outFileNodeInfo, outFileEdgeList)
     
 
         
